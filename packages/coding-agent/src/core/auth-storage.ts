@@ -10,11 +10,13 @@ import {
 	loginAntigravity,
 	loginGeminiCli,
 	loginGitHubCopilot,
+	loginOpenAI,
 	type OAuthCredentials,
 	type OAuthProvider,
 } from "@mariozechner/pi-ai";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname } from "path";
+import { isHeadlessEnvironment } from "../utils/environment.js";
 
 export type ApiKeyCredential = {
 	type: "api_key";
@@ -175,10 +177,22 @@ export class AuthStorage {
 				});
 				break;
 			case "google-gemini-cli":
-				credentials = await loginGeminiCli(callbacks.onAuth, callbacks.onProgress);
+				credentials = await loginGeminiCli(callbacks.onAuth, callbacks.onProgress, {
+					headless: isHeadlessEnvironment(),
+					onPromptUrl: () => callbacks.onPrompt({ message: "Paste the redirect URL from your browser:" }),
+				});
 				break;
 			case "google-antigravity":
-				credentials = await loginAntigravity(callbacks.onAuth, callbacks.onProgress);
+				credentials = await loginAntigravity(callbacks.onAuth, callbacks.onProgress, {
+					headless: isHeadlessEnvironment(),
+					onPromptUrl: () => callbacks.onPrompt({ message: "Paste the redirect URL from your browser:" }),
+				});
+				break;
+			case "openai":
+				credentials = await loginOpenAI(callbacks.onAuth, callbacks.onProgress, {
+					headless: isHeadlessEnvironment(),
+					onPromptUrl: () => callbacks.onPrompt({ message: "Paste the redirect URL from your browser:" }),
+				});
 				break;
 			default:
 				throw new Error(`Unknown OAuth provider: ${provider}`);

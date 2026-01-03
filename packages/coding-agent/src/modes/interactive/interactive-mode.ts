@@ -35,6 +35,7 @@ import { loadProjectContextFiles } from "../../core/system-prompt.js";
 import type { TruncationResult } from "../../core/tools/truncate.js";
 import { getChangelogPath, parseChangelog } from "../../utils/changelog.js";
 import { copyToClipboard } from "../../utils/clipboard.js";
+import { canOpenBrowser, supportsHyperlinks } from "../../utils/environment.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -1993,22 +1994,35 @@ export class InteractiveMode {
 							await this.session.modelRegistry.authStorage.login(providerId as OAuthProvider, {
 								onAuth: (info: { url: string; instructions?: string }) => {
 									this.chatContainer.addChild(new Spacer(1));
-									// Use OSC 8 hyperlink escape sequence for clickable link
-									const hyperlink = `\x1b]8;;${info.url}\x07Click here to login\x1b]8;;\x07`;
-									this.chatContainer.addChild(new Text(theme.fg("accent", hyperlink), 1, 0));
+
+									// Always show the plain URL for copy/paste (essential for headless environments)
+									this.chatContainer.addChild(
+										new Text(theme.fg("muted", "Open this URL in your browser:"), 1, 0),
+									);
+									this.chatContainer.addChild(new Text(theme.fg("accent", info.url), 1, 0));
+
+									// Show clickable hyperlink only if terminal supports it
+									if (supportsHyperlinks()) {
+										const hyperlink = `\x1b]8;;${info.url}\x07Click here to login\x1b]8;;\x07`;
+										this.chatContainer.addChild(new Text(theme.fg("dim", hyperlink), 1, 0));
+									}
+
 									if (info.instructions) {
 										this.chatContainer.addChild(new Spacer(1));
 										this.chatContainer.addChild(new Text(theme.fg("warning", info.instructions), 1, 0));
 									}
 									this.ui.requestRender();
 
-									const openCmd =
-										process.platform === "darwin"
-											? "open"
-											: process.platform === "win32"
-												? "start"
-												: "xdg-open";
-									exec(`${openCmd} "${info.url}"`);
+									// Only attempt to auto-open browser in graphical environments
+									if (canOpenBrowser()) {
+										const openCmd =
+											process.platform === "darwin"
+												? "open"
+												: process.platform === "win32"
+													? "start"
+													: "xdg-open";
+										exec(`${openCmd} "${info.url}"`);
+									}
 								},
 								onPrompt: async (prompt: { message: string; placeholder?: string }) => {
 									this.chatContainer.addChild(new Spacer(1));

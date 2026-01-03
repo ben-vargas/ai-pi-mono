@@ -1,5 +1,17 @@
 # pi
 
+> **Fork: `ben-vargas` branch (v0.32.0-ben-vargas)**
+>
+> This is a personal fork diverging from [upstream/main](https://github.com/badlogic/pi-mono). Changes:
+>
+> - **Headless OAuth for Google providers**: In SSH/tmux/headless environments, Google OAuth (Gemini CLI, Antigravity) now shows the auth URL and prompts for the redirect URL paste instead of waiting for a localhost callback that can't be reached.
+> - **Headless OAuth for OpenAI**: Same headless flow for OpenAI OAuth (ChatGPT Plus/Pro).
+> - **OpenAI OAuth + Codex compatibility**: Adds `loginOpenAI`/`refreshOpenAIToken` for ChatGPT subscription OAuth, enables `gpt-5.2-codex` model, and uses Codex CLI system prompt/headers for ChatGPT backend compatibility.
+>
+> To sync with upstream: `git fetch upstream && git merge upstream/main`
+
+---
+
 A terminal-based coding agent with multi-model support, mid-session model switching, and a simple CLI for headless coding tasks.
 
 Works on Linux, macOS, and Windows (requires bash; see [Windows Setup](#windows-setup)).
@@ -143,6 +155,7 @@ Use `/login` to authenticate with subscription-based or free-tier providers:
 | Provider | Models | Cost |
 |----------|--------|------|
 | Anthropic (Claude Pro/Max) | Claude models via your subscription | Subscription |
+| OpenAI (ChatGPT Plus/Pro) | OpenAI models via ChatGPT backend (incl. GPT-5.2 Codex) | Subscription |
 | GitHub Copilot | GPT-4o, Claude, Gemini via Copilot subscription | Subscription |
 | Google Gemini CLI | Gemini 2.0/2.5 models | Free (Google account) |
 | Google Antigravity | Gemini 3, Claude, GPT-OSS | Free (Google account) |
@@ -157,6 +170,10 @@ pi
 **GitHub Copilot notes:**
 - Press Enter for github.com, or enter your GitHub Enterprise Server domain
 - If you get "model not supported" error, enable it in VS Code: Copilot Chat → model selector → select model → "Enable"
+
+**OpenAI notes:**
+- Requires a ChatGPT Plus/Pro/Team/Enterprise subscription
+- Login enables OpenAI models via the ChatGPT backend (the model list may not show every legacy model)
 
 **Google providers notes:**
 - Gemini CLI uses the production Cloud Code Assist endpoint (standard Gemini models)
@@ -198,7 +215,7 @@ The agent reads, writes, and edits files, and executes commands via bash.
 | `/tree` | Navigate session tree in-place (search, filter, label entries) |
 | `/branch` | Create new conversation branch from a previous message |
 | `/resume` | Switch to a different session (interactive selector) |
-| `/login` | OAuth login for subscription-based models |
+| `/login` | OAuth login for subscription-based models (OpenAI, Anthropic, Copilot, Google) |
 | `/logout` | Clear OAuth tokens |
 | `/new` | Start a new session |
 | `/copy` | Copy last agent message to clipboard |
