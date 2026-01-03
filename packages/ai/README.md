@@ -845,6 +845,7 @@ const key = getEnvApiKey('openai');  // checks OPENAI_API_KEY
 Several providers require OAuth authentication instead of static API keys:
 
 - **Anthropic** (Claude Pro/Max subscription)
+- **OpenAI** (ChatGPT Plus/Pro subscription)
 - **GitHub Copilot** (Copilot subscription)
 - **Google Gemini CLI** (Free Gemini 2.0/2.5 via Google Cloud Code Assist)
 - **Antigravity** (Free Gemini 3, Claude, GPT-OSS via Google Cloud)
@@ -873,6 +874,7 @@ The library provides login and token refresh functions. Credential storage is th
 import {
   // Login functions (return credentials, do not store)
   loginAnthropic,
+  loginOpenAI,
   loginGitHubCopilot,
   loginGeminiCli,
   loginAntigravity,
@@ -882,7 +884,7 @@ import {
   getOAuthApiKey,      // (provider, credentialsMap) => { newCredentials, apiKey } | null
 
   // Types
-  type OAuthProvider,  // 'anthropic' | 'github-copilot' | 'google-gemini-cli' | 'google-antigravity'
+  type OAuthProvider,  // 'anthropic' | 'openai' | 'github-copilot' | 'google-gemini-cli' | 'google-antigravity'
   type OAuthCredentials,
 } from '@mariozechner/pi-ai';
 ```
@@ -936,6 +938,8 @@ const response = await complete(model, {
 ```
 
 ### Provider Notes
+
+**OpenAI**: Requires ChatGPT Plus/Pro/Team/Enterprise subscription. OAuth uses the ChatGPT backend, so you can use OpenAI models even if not all legacy IDs are listed in the catalog.
 
 **GitHub Copilot**: If you get "The requested model is not supported" error, enable the model manually in VS Code: open Copilot Chat, click the model selector, select the model (warning icon), and click "Enable".
 

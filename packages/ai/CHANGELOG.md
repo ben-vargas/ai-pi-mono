@@ -5,6 +5,12 @@
 ### Added
 
 - Vertex AI provider with ADC (Application Default Credentials) support. Authenticate with `gcloud auth application-default login`, set `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION`, and access Gemini models via Vertex AI. ([#300](https://github.com/badlogic/pi-mono/pull/300) by [@default-anton](https://github.com/default-anton))
+- **OpenAI OAuth provider**: Added ChatGPT Plus/Pro OAuth login helpers (`loginOpenAI`, `refreshOpenAIToken`) and provider metadata for OAuth-based auth. ([#410](https://github.com/badlogic/pi-mono/pull/410) by [@melihmucuk](https://github.com/melihmucuk))
+- **GPT-5.2 Codex model**: Added `gpt-5.2-codex` to the OpenAI responses model catalog for ChatGPT-backed Codex access. ([#410](https://github.com/badlogic/pi-mono/pull/410) by [@melihmucuk](https://github.com/melihmucuk))
+
+### Changed
+
+- **OpenAI ChatGPT backend support**: Added handling for ChatGPT backend requirements (instructions field, stateless IDs, reasoning defaults, and parameter restrictions) in the OpenAI responses provider. ([#410](https://github.com/badlogic/pi-mono/pull/410) by [@melihmucuk](https://github.com/melihmucuk))
 
 ### Fixed
 
