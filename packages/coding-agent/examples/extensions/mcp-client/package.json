@@ -1,0 +1,17 @@
+{
+  "name": "pi-mcp-client",
+  "version": "1.0.0",
+  "description": "MCP (Model Context Protocol) client extension for pi - enables integration with any MCP server",
+  "type": "module",
+  "pi": {
+    "entry": "src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.25.0"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@sinclair/typebox": "*"
+  }
+}
