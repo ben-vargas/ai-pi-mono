@@ -17,8 +17,10 @@ export interface MCPServerConfig {
 	args?: string[];
 	/** Environment variables for stdio subprocess */
 	env?: Record<string, string>;
-	/** Optional list of tool names to register (if not specified, all tools are registered) */
-	tools?: string[];
+	/** Allowlist: only register these tools (applied first) */
+	allowedTools?: string[];
+	/** Denylist: never register these tools (applied after allowlist) */
+	deniedTools?: string[];
 	/** Whether to connect automatically on extension load */
 	autoConnect?: boolean;
 	/** Optional headers for HTTP transport */

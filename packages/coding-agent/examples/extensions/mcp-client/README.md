@@ -42,8 +42,9 @@ Create `~/.pi/mcp-servers.json` (or `.pi/mcp-servers.json` in your project):
       "id": "exa",
       "name": "Exa Search",
       "type": "http",
-      "url": "https://mcp.exa.ai/mcp?tools=web_search_exa,get_code_context_exa",
-      "autoConnect": true
+      "url": "https://mcp.exa.ai/mcp",
+      "autoConnect": true,
+      "allowedTools": ["web_search_exa", "get_code_context_exa"]
     }
   ]
 }
@@ -60,9 +61,28 @@ Create `~/.pi/mcp-servers.json` (or `.pi/mcp-servers.json` in your project):
 | `command` | string | For stdio: command to run |
 | `args` | string[] | For stdio: command arguments |
 | `env` | object | For stdio: environment variables |
-| `tools` | string[] | Optional: only register these tools |
+| `allowedTools` | string[] | Allowlist: only register these tools (applied first) |
+| `deniedTools` | string[] | Denylist: never register these tools (applied after allowlist) |
 | `autoConnect` | boolean | Connect automatically on startup |
 | `headers` | object | Optional: HTTP headers |
+
+### Tool Filtering
+
+You can control which tools are registered using `allowedTools` and `deniedTools`:
+
+- **allowedTools only**: Only these specific tools are registered
+- **deniedTools only**: All tools except these are registered
+- **Both**: First filter to allowedTools, then remove deniedTools
+
+```json
+{
+  "id": "filesystem",
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/data"],
+  "deniedTools": ["write_file", "delete_file"]
+}
+```
 
 ### Transport Types
 
@@ -110,8 +130,9 @@ Create `~/.pi/mcp-servers.json` (or `.pi/mcp-servers.json` in your project):
          "id": "exa",
          "name": "Exa Search",
          "type": "http",
-         "url": "https://mcp.exa.ai/mcp?tools=web_search_exa,get_code_context_exa",
-         "autoConnect": true
+         "url": "https://mcp.exa.ai/mcp",
+         "autoConnect": true,
+         "allowedTools": ["web_search_exa", "get_code_context_exa"]
        }
      ]
    }
@@ -137,17 +158,20 @@ MCP tools are registered with the prefix `mcp_{serverId}_{toolName}` to avoid co
 
 One concern with MCP is that tool definitions consume context tokens. To minimize this:
 
-1. **Use the `tools` filter** in your config to only register tools you need:
+1. **Use `allowedTools`** to only register tools you need:
    ```json
    {
      "url": "https://mcp.exa.ai/mcp",
-     "tools": ["web_search_exa", "get_code_context_exa"]
+     "allowedTools": ["web_search_exa", "get_code_context_exa"]
    }
    ```
 
-2. **Use URL parameters** for servers that support them:
-   ```
-   https://mcp.exa.ai/mcp?tools=web_search_exa
+2. **Use `deniedTools`** to exclude tools you don't want:
+   ```json
+   {
+     "url": "https://some-server.com/mcp",
+     "deniedTools": ["dangerous_tool", "unused_tool"]
+   }
    ```
 
 3. **Don't auto-connect** servers you rarely use - connect them on-demand with `/mcp connect`
@@ -176,7 +200,7 @@ See the [MCP Servers Repository](https://github.com/modelcontextprotocol/servers
 
 1. Verify connection: `/mcp status`
 2. List available tools: `/mcp tools`
-3. Check if the tool is filtered by your `tools` config
+3. Check if the tool is filtered by `allowedTools` or `deniedTools` in your config
 
 ### Performance Issues
 
