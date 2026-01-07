@@ -17,9 +17,9 @@ export interface MCPServerConfig {
 	args?: string[];
 	/** Environment variables for stdio subprocess */
 	env?: Record<string, string>;
-	/** Allowlist: only register these tools (applied first) */
+	/** Allowlist: only register these tools (takes precedence over deniedTools) */
 	allowedTools?: string[];
-	/** Denylist: never register these tools (applied after allowlist) */
+	/** Denylist: register all tools except these (ignored if allowedTools is set) */
 	deniedTools?: string[];
 	/** Whether to connect automatically on extension load */
 	autoConnect?: boolean;

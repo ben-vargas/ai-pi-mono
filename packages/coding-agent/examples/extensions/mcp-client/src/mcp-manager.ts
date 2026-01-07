@@ -74,19 +74,20 @@ export class MCPManager {
 			inputSchema: t.inputSchema as Record<string, unknown>,
 		}));
 
-		// Filter tools based on allowlist and denylist
-		let tools = allTools;
+		// Filter tools based on allowlist or denylist
+		let tools: MCPTool[];
 
-		// Apply allowlist first (if specified, only these tools pass through)
 		if (config.allowedTools && config.allowedTools.length > 0) {
+			// Allowlist takes precedence - only these tools are registered
 			const allowedSet = new Set(config.allowedTools);
-			tools = tools.filter((t) => allowedSet.has(t.name));
-		}
-
-		// Apply denylist second (remove any denied tools)
-		if (config.deniedTools && config.deniedTools.length > 0) {
+			tools = allTools.filter((t) => allowedSet.has(t.name));
+		} else if (config.deniedTools && config.deniedTools.length > 0) {
+			// Denylist - all tools except these are registered
 			const deniedSet = new Set(config.deniedTools);
-			tools = tools.filter((t) => !deniedSet.has(t.name));
+			tools = allTools.filter((t) => !deniedSet.has(t.name));
+		} else {
+			// No filtering - all tools are registered
+			tools = allTools;
 		}
 
 		const connectedServer: ConnectedServer = {

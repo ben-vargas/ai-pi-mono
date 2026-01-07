@@ -61,18 +61,20 @@ Create `~/.pi/mcp-servers.json` (or `.pi/mcp-servers.json` in your project):
 | `command` | string | For stdio: command to run |
 | `args` | string[] | For stdio: command arguments |
 | `env` | object | For stdio: environment variables |
-| `allowedTools` | string[] | Allowlist: only register these tools (applied first) |
-| `deniedTools` | string[] | Denylist: never register these tools (applied after allowlist) |
+| `allowedTools` | string[] | Allowlist: only register these tools (takes precedence) |
+| `deniedTools` | string[] | Denylist: register all tools except these (ignored if allowedTools is set) |
 | `autoConnect` | boolean | Connect automatically on startup |
 | `headers` | object | Optional: HTTP headers |
 
 ### Tool Filtering
 
-You can control which tools are registered using `allowedTools` and `deniedTools`:
+You can control which tools are registered using `allowedTools` or `deniedTools`:
 
-- **allowedTools only**: Only these specific tools are registered
-- **deniedTools only**: All tools except these are registered
-- **Both**: First filter to allowedTools, then remove deniedTools
+| Config | Behavior |
+|--------|----------|
+| Neither set | All tools from the server are registered |
+| `allowedTools` set | Only these tools are registered (`deniedTools` is ignored) |
+| `deniedTools` only | All tools except these are registered |
 
 ```json
 {
