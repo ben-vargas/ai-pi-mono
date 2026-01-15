@@ -295,6 +295,8 @@ export interface LoadSkillsOptions extends SkillsSettings {
 	cwd?: string;
 	/** Agent config directory for global skills. Default: ~/.pi/agent */
 	agentDir?: string;
+	/** Additional directories provided by extensions via skills_discover event */
+	extensionDirectories?: string[];
 }
 
 /**
@@ -311,6 +313,7 @@ export function loadSkills(options: LoadSkillsOptions = {}): LoadSkillsResult {
 		enablePiUser = true,
 		enablePiProject = true,
 		customDirectories = [],
+		extensionDirectories = [],
 		ignoredSkills = [],
 		includeSkills = [],
 	} = options;
@@ -390,6 +393,9 @@ export function loadSkills(options: LoadSkillsOptions = {}): LoadSkillsResult {
 	}
 	for (const customDir of customDirectories) {
 		addSkills(loadSkillsFromDirInternal(customDir.replace(/^~(?=$|[\\/])/, homedir()), "custom", "recursive"));
+	}
+	for (const extDir of extensionDirectories) {
+		addSkills(loadSkillsFromDirInternal(extDir.replace(/^~(?=$|[\\/])/, homedir()), "extension", "recursive"));
 	}
 
 	return {

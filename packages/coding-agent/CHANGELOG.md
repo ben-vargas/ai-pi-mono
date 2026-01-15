@@ -111,6 +111,7 @@
 - Show loaded prompt templates on startup ([#743](https://github.com/badlogic/pi-mono/pull/743) by [@tallshort](https://github.com/tallshort))
 - MiniMax China (`minimax-cn`) provider support ([#725](https://github.com/badlogic/pi-mono/pull/725) by [@tallshort](https://github.com/tallshort))
 - `gpt-5.2-codex` models for GitHub Copilot and OpenCode Zen providers ([#734](https://github.com/badlogic/pi-mono/pull/734) by [@aadishv](https://github.com/aadishv))
+- Extension hook `skills_discover` for providing additional skill directories during skill discovery
 
 ### Changed
 
