@@ -17,6 +17,7 @@ import { execCommand } from "../exec.js";
 import type {
 	AppendEntryHandler,
 	ExtensionAPI,
+	ExtensionContext,
 	ExtensionFactory,
 	ExtensionFlag,
 	ExtensionShortcut,
@@ -170,7 +171,7 @@ function createExtensionAPI(
 			shortcut: KeyId,
 			options: {
 				description?: string;
-				handler: (ctx: import("./types.js").ExtensionContext) => Promise<void> | void;
+				handler: (ctx: ExtensionContext) => Promise<void> | void;
 			},
 		): void {
 			shortcuts.set(shortcut, { shortcut, extensionPath, ...options });
