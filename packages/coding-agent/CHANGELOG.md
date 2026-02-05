@@ -21,6 +21,10 @@
 - Added SSH URL support for git packages ([#1287](https://github.com/badlogic/pi-mono/pull/1287) by [@markusn](https://github.com/markusn))
 - Model selectors now display the selected model name ([#1275](https://github.com/badlogic/pi-mono/pull/1275) by [@haoqixu](https://github.com/haoqixu))
 
+### Changed
+
+- Changed provider default model IDs to prefer Claude Opus 4.6 where available for Anthropic, Amazon Bedrock, Vercel AI Gateway, and OpenCode.
+
 ### Fixed
 
 - Fixed HTML export losing indentation in ANSI-rendered tool output (e.g. JSON code blocks in custom tool results) ([#1269](https://github.com/badlogic/pi-mono/pull/1269) by [@aliou](https://github.com/aliou))

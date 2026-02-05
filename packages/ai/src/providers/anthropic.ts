@@ -3,6 +3,7 @@ import type {
 	ContentBlockParam,
 	MessageCreateParamsStreaming,
 	MessageParam,
+	OutputConfig,
 } from "@anthropic-ai/sdk/resources/messages.js";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { calculateCost } from "../models.js";
@@ -20,6 +21,7 @@ import type {
 	StreamOptions,
 	TextContent,
 	ThinkingContent,
+	ThinkingLevel,
 	Tool,
 	ToolCall,
 	ToolResultMessage,
@@ -154,8 +156,32 @@ function convertContentBlocks(content: (TextContent | ImageContent)[]):
 export interface AnthropicOptions extends StreamOptions {
 	thinkingEnabled?: boolean;
 	thinkingBudgetTokens?: number;
+	thinkingMode?: "adaptive" | "budget";
+	thinkingEffort?: AnthropicAdaptiveEffort;
 	interleavedThinking?: boolean;
 	toolChoice?: "auto" | "any" | "none" | { type: "tool"; name: string };
+}
+
+type AnthropicAdaptiveEffort = NonNullable<OutputConfig["effort"]>;
+
+function isAnthropicOpus46(modelId: string): boolean {
+	const id = modelId.toLowerCase();
+	const modelWithoutProvider = id.includes("/") ? id.split("/").slice(1).join("/") : id;
+	return /^claude-opus-4(?:-|\.)6(?:-\d{8})?$/.test(modelWithoutProvider);
+}
+
+function mapReasoningLevelToAnthropicEffort(level: ThinkingLevel, supportsMaxEffort: boolean): AnthropicAdaptiveEffort {
+	switch (level) {
+		case "minimal":
+		case "low":
+			return "low";
+		case "medium":
+			return "medium";
+		case "high":
+			return "high";
+		case "xhigh":
+			return supportsMaxEffort ? "max" : "high";
+	}
 }
 
 function mergeHeaders(...headerSources: (Record<string, string> | undefined)[]): Record<string, string> {
@@ -392,6 +418,16 @@ export const streamSimpleAnthropic: StreamFunction<"anthropic-messages", SimpleS
 		return streamAnthropic(model, context, { ...base, thinkingEnabled: false } satisfies AnthropicOptions);
 	}
 
+	const opus46 = isAnthropicOpus46(model.id);
+	if (opus46) {
+		return streamAnthropic(model, context, {
+			...base,
+			thinkingEnabled: true,
+			thinkingMode: "adaptive",
+			thinkingEffort: mapReasoningLevelToAnthropicEffort(options.reasoning, true),
+		} satisfies AnthropicOptions);
+	}
+
 	const adjusted = adjustMaxTokensForThinking(
 		base.maxTokens || 0,
 		model.maxTokens,
@@ -403,6 +439,7 @@ export const streamSimpleAnthropic: StreamFunction<"anthropic-messages", SimpleS
 		...base,
 		maxTokens: adjusted.maxTokens,
 		thinkingEnabled: true,
+		thinkingMode: "budget",
 		thinkingBudgetTokens: adjusted.thinkingBudget,
 	} satisfies AnthropicOptions);
 };
@@ -518,10 +555,19 @@ function buildParams(
 	}
 
 	if (options?.thinkingEnabled && model.reasoning) {
-		params.thinking = {
-			type: "enabled",
-			budget_tokens: options.thinkingBudgetTokens || 1024,
-		};
+		const useAdaptiveThinking = options.thinkingMode === "adaptive" && isAnthropicOpus46(model.id);
+		if (useAdaptiveThinking) {
+			params.thinking = { type: "adaptive" };
+			params.output_config = {
+				...params.output_config,
+				effort: options.thinkingEffort || "medium",
+			};
+		} else {
+			params.thinking = {
+				type: "enabled",
+				budget_tokens: options.thinkingBudgetTokens || 1024,
+			};
+		}
 	}
 
 	if (options?.toolChoice) {

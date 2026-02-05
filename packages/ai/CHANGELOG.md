@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added Anthropic Opus 4.6 adaptive thinking support (`thinking: { type: "adaptive" }`) with `output_config.effort` mapping from pi reasoning levels.
+
+### Changed
+
+- Changed Anthropic reasoning request construction to branch by model: Opus 4.6 uses adaptive thinking + effort; older Anthropic models remain budget-based (`enabled + budget_tokens`).
+- Changed `supportsXhigh()` to include Anthropic Opus 4.6 model IDs (including provider-prefixed aliases) in addition to existing OpenAI support.
+
 ## [0.52.0] - 2026-02-05
 
 ### Added

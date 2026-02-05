@@ -438,7 +438,7 @@ if (model.reasoning) {
 const response = await completeSimple(model, {
   messages: [{ role: 'user', content: 'Solve: 2x + 5 = 13' }]
 }, {
-  reasoning: 'medium'  // 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' (xhigh maps to high on non-OpenAI providers)
+  reasoning: 'medium'  // 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' (xhigh maps to max for Anthropic Opus 4.6, and maps to high otherwise)
 });
 
 // Access thinking and text blocks
@@ -465,12 +465,16 @@ await complete(openaiModel, context, {
   reasoningSummary: 'detailed'  // OpenAI Responses API only
 });
 
-// Anthropic Thinking (Claude Sonnet 4)
+// Anthropic Thinking (Claude Sonnet 4 / Opus 4.6)
 const anthropicModel = getModel('anthropic', 'claude-sonnet-4-20250514');
 await complete(anthropicModel, context, {
   thinkingEnabled: true,
   thinkingBudgetTokens: 8192  // Optional token limit
 });
+
+// Note:
+// - Claude Opus 4.6 uses adaptive thinking + output_config.effort
+// - Older Anthropic models keep budget-based thinking (enabled + budget_tokens)
 
 // Google Gemini Thinking
 const googleModel = getModel('google', 'gemini-2.5-flash');

@@ -47,10 +47,15 @@ export function calculateCost<TApi extends Api>(model: Model<TApi>, usage: Usage
 
 /**
  * Check if a model supports xhigh thinking level.
- * Currently only certain OpenAI Codex models support this.
+ * Supports specific OpenAI models and Anthropic Opus 4.6 on the Anthropic Messages API.
  */
 export function supportsXhigh<TApi extends Api>(model: Model<TApi>): boolean {
-	return model.id.includes("gpt-5.2");
+	const modelId = model.id.toLowerCase();
+	if (modelId.includes("gpt-5.2")) return true;
+	if (model.api !== "anthropic-messages") return false;
+
+	const modelWithoutProvider = modelId.includes("/") ? modelId.split("/").slice(1).join("/") : modelId;
+	return /^claude-opus-4(?:-|\.)6(?:-\d{8})?$/.test(modelWithoutProvider);
 }
 
 /**
