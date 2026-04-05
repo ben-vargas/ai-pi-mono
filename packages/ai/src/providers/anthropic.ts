@@ -515,6 +515,11 @@ export const streamSimpleAnthropic: StreamFunction<"anthropic-messages", SimpleS
 	} satisfies AnthropicOptions);
 };
 
+/**
+ * Returns true when the supplied API key is an Anthropic OAuth access token
+ * (format: sk-ant-oat-*). OAuth tokens are issued by claude.ai for CLI use
+ * and require different request headers compared to regular API keys.
+ */
 function isOAuthToken(apiKey: string): boolean {
 	return apiKey.includes("sk-ant-oat");
 }
@@ -562,7 +567,13 @@ function createClient(
 		betaFeatures.push("interleaved-thinking-2025-05-14");
 	}
 
-	// OAuth: Bearer auth, Claude Code identity headers
+	// OAuth: direct Anthropic Messages API call using the OAuth access token as a Bearer token.
+	// This library calls api.anthropic.com directly via @anthropic-ai/sdk — it does NOT use the
+	// @anthropic-ai/claude-code subprocess SDK.  To satisfy the requirements of the OAuth grant
+	// (issued for CLI use), the request must include Claude Code-compatible identity headers:
+	//   - anthropic-beta: claude-code-20250219,oauth-2025-04-20  (required by the OAuth grant)
+	//   - user-agent / x-app: identify the client as a CLI session
+	// Without these headers, Anthropic's backend will reject OAuth tokens with a 403.
 	if (isOAuthToken(apiKey)) {
 		const client = new Anthropic({
 			apiKey: null,
@@ -618,7 +629,9 @@ function buildParams(
 		stream: true,
 	};
 
-	// For OAuth tokens, we MUST include Claude Code identity
+	// For OAuth tokens, the Claude Code identity system prompt MUST be the first system block.
+	// This satisfies the requirements of the OAuth grant (issued for CLI/Claude Code use) so that
+	// Anthropic's backend applies the correct Claude Pro/Max subscription entitlements.
 	if (isOAuthToken) {
 		params.system = [
 			{
